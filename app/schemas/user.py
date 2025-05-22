@@ -15,6 +15,7 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 class UserOut(BaseModel):
     id: int
     username: str
@@ -26,3 +27,10 @@ class UserOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class TokenRefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = 'bearer'
