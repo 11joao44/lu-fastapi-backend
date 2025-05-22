@@ -28,7 +28,7 @@ class AuthService:
         user = User(
             username = data.username,
             email = data.email,
-            hashed_password = self.hash_password(data.hashed_password)
+            hashed_password = self.hash_password(data.password)
         )
         
         return await self.user_repo.create(user)

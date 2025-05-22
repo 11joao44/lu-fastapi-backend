@@ -10,11 +10,11 @@ class UserSchema(BaseModel):
 class UserRegister(BaseModel):
     username: str
     email: EmailStr
-    hashed_password: str
-    
+    password: str
+
 class UserLogin(BaseModel):
     email: EmailStr
-    hashed_password: str
+    password: str
 class UserOut(BaseModel):
     id: int
     username: str
