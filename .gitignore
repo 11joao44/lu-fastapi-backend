@@ -1,5 +1,6 @@
 /venv
 .env
+main.ipynb
 
 # Ignora arquivos compilados do Python
 __pycache__/

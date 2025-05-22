@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from app.routes.user import users_routes
+from app.routes.auth import router as auth_router
 
 def create_routes(instance_fastapi: FastAPI) -> None:
     
     @instance_fastapi.get('/')
     def home():
-        return "API RODANDO"
+            return "API RODANDO"
     
-    users_routes(instance_fastapi)
+    instance_fastapi.include_router(auth_router)
+    

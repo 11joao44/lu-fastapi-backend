@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
 class UserSchema(BaseModel):
@@ -7,12 +7,15 @@ class UserSchema(BaseModel):
     is_active: bool
     is_admin: bool
 
-class UserRegister(BaseModel): # Para entrada (request)
+class UserRegister(BaseModel):
     username: str
     email: EmailStr
-    password: str
-
-class UserOut(BaseModel): # Para saída (response)
+    hashed_password: str
+    
+class UserLogin(BaseModel):
+    email: EmailStr
+    hashed_password: str
+class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
@@ -21,6 +24,5 @@ class UserOut(BaseModel): # Para saída (response)
     created_in: datetime
     updated_in: datetime | None = None
 
-    class Config:
-        from_attributes = True  # Pydantic v2
+    model_config = ConfigDict(from_attributes=True)
 
