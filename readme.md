@@ -12,6 +12,7 @@ A API deve atender aos seguintes módulos:
 
 - [x] **Arquitetura**: 3-Layers Routers → Services → Repositories.
 - [X] **Autenticação (JWT)**: login, registro e refresh token.
+- [X] **Models (ORM)**: Mapeando tabelas do db em models.
 - [ ] **Clientes**: CRUD completo, com filtros e validações.
 - [ ] **Produtos**: CRUD com filtros (categoria, preço, disponibilidade).
 - [ ] **Pedidos**: múltiplos produtos por pedido, status e filtros.

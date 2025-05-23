@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from passlib.context import CryptContext
 from app.repositories.user_repository import UserRepository
-from app.models.user import User
+from app.models.users import Users
 from app.schemas.user import UserLogin, UserOut, UserRegister
 from app.core.config import settings
 from jose import JWTError, jwt
@@ -29,7 +29,7 @@ class AuthService:
         if await self.user_repo.get_by_email(data.email):
             raise HTTPException(status_code=HTTPStatus.CONFLICT, detail="E-mail já cadastrado.")
         
-        user = User(
+        user = Users(
             username = data.username,
             email = data.email,
             hashed_password = self.hash_password(data.password)
