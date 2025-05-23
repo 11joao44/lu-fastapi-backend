@@ -23,5 +23,5 @@ async def refresh_token(req: TokenRefreshRequest = Body(..., embed=True), db: As
     auth_service = AuthService(UserRepository(db))
     token = await auth_service.refresh_token(req.refresh_token)
     if not token:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token de refresh inválido ou expirado.")
     return TokenResponse(access_token=token, refresh_token=req.refresh_token)

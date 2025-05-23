@@ -1,16 +1,16 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, func, text
+from sqlalchemy import Column, Integer, String, Text, DateTime, func
 from app.core.database import Base, relationship
 
-class Users(Base):
-    __tablename__ = "users"
-
+class Clients(Base):
+    __tablename__ = "clients"
+    
     id = Column(Integer, primary_key=True)
-    username = Column(String(64), index=True, nullable=False)
+    name = Column(String(64), index=True, nullable=False)
     email = Column(String(128), unique=True, nullable=False)
-    hashed_password = Column(String(256), nullable=False)
-    is_active = Column(Boolean, nullable=False, server_default=text("true"))
-    is_admin = Column(Boolean, nullable=False, server_default=text("false"))
+    phone = Column(String(20), unique=True, nullable=True)
+    cpf_cnpj = Column(String(20), unique=True, nullable=False)
+    address = Column(Text, unique=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
+
     orders = relationship("Orders", back_populates=__tablename__)

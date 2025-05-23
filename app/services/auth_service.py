@@ -42,7 +42,7 @@ class AuthService:
 
         if not user or not pwd_context.verify(data.password, user.hashed_password):
             raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Credenciais inválidas.")
-               
+            
         return {
             "token": {
                 "access_token": self.create_access_token({"sub": user.id}),
@@ -53,36 +53,24 @@ class AuthService:
         }
 
     async def refresh_token(self, refresh_token: str) -> str:
-        logger.info("=== [refresh_token] ===")
-        logger.info(f"Refresh token recebido: {refresh_token}")
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, settings.ALGORITHM)
-            logger.info(f"Payload decodificado: {payload}")
 
             if payload.get("type") != "refresh":
-                logger.warning(f"Tipo de token NÃO é 'refresh': {payload.get('type')}")
                 raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token de refresh inválido ou expirado.")
 
             user_id = payload.get("sub")
-            logger.info(f"User ID extraído: {user_id}")
             if not user_id:
-                logger.warning("User ID não encontrado no payload!")
                 raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token de refresh inválido ou expirado.")
 
             token = self.create_access_token({"sub": user_id})
-            logger.info(f"Novo access_token gerado: {token}")
             return token
 
         except JWTError as e:
-            logger.error(f"Erro ao decodificar token JWT: {str(e)}")
-            raise HTTPException(
-                status_code=HTTPStatus.UNAUTHORIZED,
-                detail="Token de refresh inválido ou expirado."
-            )
-    
+            raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token de refresh inválido ou expirado." )
+        
     def create_access_token(self, data: dict, expire_delta: int = 30):
         to_encode = data.copy()
-        # Força sub para string (se existir)
         if "sub" in to_encode:
             to_encode["sub"] = str(to_encode["sub"])
         to_encode.update({"exp": datetime.now(timezone.utc) + timedelta(minutes=expire_delta)})
@@ -90,8 +78,10 @@ class AuthService:
 
     def create_refresh_token(self, data: dict, expire_delta: int = 7 * 24 * 60):
         to_encode = data.copy()
+        
         if "sub" in to_encode:
             to_encode["sub"] = str(to_encode["sub"])
+        
         to_encode.update({
             "exp": datetime.now(timezone.utc) + timedelta(minutes=expire_delta),
             "type": "refresh"

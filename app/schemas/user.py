@@ -22,8 +22,8 @@ class UserOut(BaseModel):
     email: EmailStr
     is_active: bool
     is_admin: bool
-    created_in: datetime
-    updated_in: datetime | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
