@@ -1,11 +1,16 @@
+from fastapi import HTTPException
 from passlib.context import CryptContext
 from app.repositories.user_repository import UserRepository
 from app.models.user import User
 from app.schemas.user import UserLogin, UserOut, UserRegister
 from app.core.config import settings
-from pydantic import EmailStr
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from http import HTTPStatus
+from datetime import datetime, timedelta, timezone
+import logging
+
+logger = logging.getLogger("uvicorn.error")
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -22,8 +27,7 @@ class AuthService:
     async def register_user(self, data: UserRegister):
         
         if await self.user_repo.get_by_email(data.email):
-            print("Email já existente")
-            raise Exception("E-mail já cadastrado.")
+            raise HTTPException(status_code=HTTPStatus.CONFLICT, detail="E-mail já cadastrado.")
         
         user = User(
             username = data.username,
@@ -35,33 +39,63 @@ class AuthService:
     
     async def login_user(self, data: UserLogin):
         user = await self.user_repo.get_by_email(data.email)
-        if not user or not pwd_context.verify(data.password, user.hashed_password):
-            return None
-        return UserOut(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            is_active=user.is_active,
-            is_admin=user.is_admin,
-            created_in=user.created_in,
-            updated_in=user.updated_in
-        )
 
-    async def refresh_token(self, refresh_token: str) -> str | None:
+        if not user or not pwd_context.verify(data.password, user.hashed_password):
+            raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Credenciais inválidas.")
+               
+        return {
+            "token": {
+                "access_token": self.create_access_token({"sub": user.id}),
+                "refresh_token": self.create_refresh_token({"sub": user.id}),
+                "token_type": "bearer",
+            },
+            "user": UserOut.model_validate(user)
+        }
+
+    async def refresh_token(self, refresh_token: str) -> str:
+        logger.info("=== [refresh_token] ===")
+        logger.info(f"Refresh token recebido: {refresh_token}")
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, settings.ALGORITHM)
+            logger.info(f"Payload decodificado: {payload}")
+
+            if payload.get("type") != "refresh":
+                logger.warning(f"Tipo de token NÃO é 'refresh': {payload.get('type')}")
+                raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token de refresh inválido ou expirado.")
+
             user_id = payload.get("sub")
-            
+            logger.info(f"User ID extraído: {user_id}")
             if not user_id:
-                return None
-            
-            access_token = self.create_access_token({"sub": user_id})
-            return access_token
-        except JWTError:
-            return None
-        
+                logger.warning("User ID não encontrado no payload!")
+                raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token de refresh inválido ou expirado.")
+
+            token = self.create_access_token({"sub": user_id})
+            logger.info(f"Novo access_token gerado: {token}")
+            return token
+
+        except JWTError as e:
+            logger.error(f"Erro ao decodificar token JWT: {str(e)}")
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail="Token de refresh inválido ou expirado."
+            )
+    
     def create_access_token(self, data: dict, expire_delta: int = 30):
-        to_enconde = data.copy()
-        to_enconde.update({"exp": datetime.now() + timedelta(minutes=expire_delta)})
-        
-        return jwt.encode(to_enconde, settings.SECRET_KEY, settings.ALGORITHM)
+        to_encode = data.copy()
+        # Força sub para string (se existir)
+        if "sub" in to_encode:
+            to_encode["sub"] = str(to_encode["sub"])
+        to_encode.update({"exp": datetime.now(timezone.utc) + timedelta(minutes=expire_delta)})
+        return jwt.encode(to_encode, settings.SECRET_KEY, settings.ALGORITHM)
+
+    def create_refresh_token(self, data: dict, expire_delta: int = 7 * 24 * 60):
+        to_encode = data.copy()
+        if "sub" in to_encode:
+            to_encode["sub"] = str(to_encode["sub"])
+        to_encode.update({
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=expire_delta),
+            "type": "refresh"
+        })
+        return jwt.encode(to_encode, settings.SECRET_KEY, settings.ALGORITHM)
+
+

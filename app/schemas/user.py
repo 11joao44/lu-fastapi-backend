@@ -27,10 +27,16 @@ class UserOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str | None = None
+    token_type: str = "bearer"
+
+class LoginResponse(BaseModel):
+    token: TokenResponse
+    user: UserOut
+
 class TokenRefreshRequest(BaseModel):
     refresh_token: str
 
 
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = 'bearer'
