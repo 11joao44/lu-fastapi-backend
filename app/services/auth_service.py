@@ -1,19 +1,14 @@
 from fastapi import HTTPException
 from passlib.context import CryptContext
 from app.repositories.user_repository import UserRepository
-from app.models.users import Users
+from app.models.users import UserModel
 from app.schemas.user import UserLogin, UserOut, UserRegister
 from app.core.config import settings
 from jose import JWTError, jwt
 from http import HTTPStatus
 from datetime import datetime, timedelta, timezone
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 class AuthService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
@@ -29,7 +24,7 @@ class AuthService:
         if await self.user_repo.get_by_email(data.email):
             raise HTTPException(status_code=HTTPStatus.CONFLICT, detail="E-mail já cadastrado.")
         
-        user = Users(
+        user = UserModel(
             username = data.username,
             email = data.email,
             hashed_password = self.hash_password(data.password)

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, func, text
 from app.core.database import Base, relationship
 
-class Users(Base):
+class UserModel(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
@@ -13,4 +13,4 @@ class Users(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
-    orders = relationship("Orders", back_populates=__tablename__)
+    orders = relationship("OrderModel", back_populates="user")
