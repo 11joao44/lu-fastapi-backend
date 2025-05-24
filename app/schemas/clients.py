@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Optional
 from datetime import datetime
 
@@ -8,6 +8,12 @@ class CreateClientSchema(BaseModel):
     phone: Optional[str]
     cpf_cnpj: str
     address: Optional[str]
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid"
+    )
+
 class ClientSchema(CreateClientSchema):
     id: int
     created_at: datetime

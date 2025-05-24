@@ -1,35 +1,76 @@
-from pydantic import EmailStr
+from app.models.users import UserModel
 from app.schemas.clients import CreateClientSchema, ClientSchema
+from app.repositories.clients import ClientRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.clients import ClientService
-from app.repositories.clients import ClientRepository
+from app.core.security import get_current_user, require_admin
 from app.core.database import session_db
-from fastapi import APIRouter, Depends
-from http import HTTPStatus
+from fastapi import APIRouter, Depends, status
+from pydantic import EmailStr
 
-router = APIRouter(tags=["clients"])
+router = APIRouter(prefix="/clients", tags=["clients"])
 
-@router.get("/clients", status_code=HTTPStatus.OK)
-async def list_clients(name: str | None = None, email: EmailStr | None = None, limit: int = 10, offset: int = 0, db: AsyncSession = Depends(session_db)):
-    client_service = ClientService(ClientRepository(db))
-    return await client_service.list_clients_service(name, email, limit, offset)
+def get_service(db: AsyncSession = Depends(session_db)) -> ClientService:
+    return ClientService(ClientRepository(db))
 
-@router.get("/clients/{id}", status_code=HTTPStatus.OK, response_model=ClientSchema)
-async def list_client(id: int, db: AsyncSession = Depends(session_db)): 
-    client_service = ClientService(ClientRepository(db))
-    return await client_service.list_client_service(id)
- 
-@router.post("/clients", status_code=HTTPStatus.CREATED, response_model=ClientSchema)
-async def register_client(client: CreateClientSchema, db: AsyncSession = Depends(session_db)):
-    client_service = ClientService(ClientRepository(db))
-    return await client_service.register_client_service(client)
+@router.get("/", status_code=status.HTTP_200_OK)
+async def list_clients_route(
+    name: str | None = None,
+    email: EmailStr | None = None,
+    limit: int = 10, offset: int = 0,
+    service: ClientService = Depends(get_service),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    Lista clientes filtrando por nome e e-mail, com paginação.
+    """
+    return await service.list_clients_service(name, email, limit, offset)
 
-@router.put("/clients/{id}", status_code=HTTPStatus.OK)
-async def update_client(id: int, client: CreateClientSchema, db: AsyncSession = Depends(session_db)):
-    client_service = ClientService(ClientRepository(db))
-    return await client_service.update_client_service(id, client)
 
-@router.delete("/clients/{id}", status_code=HTTPStatus.NO_CONTENT)
-async def delete_client(id: int, db: AsyncSession = Depends(session_db)) -> None:
-    client_service = ClientService(ClientRepository(db))
-    await client_service.delete_client_service(id)
+@router.get("/{client_id}", status_code=status.HTTP_200_OK, response_model=ClientSchema)
+async def list_client_route(
+    client_id: int,
+    service: ClientService = Depends(get_service),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    Retorna detalhes de um cliente pelo ID.
+    """
+    return await service.list_client_service(client_id)
+
+
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=ClientSchema)
+async def register_client_route(
+    client_data: CreateClientSchema,
+    service: ClientService = Depends(get_service),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    Registra um novo cliente.
+    """
+    return await service.register_client_service(client_data)
+
+
+@router.put("/{client_id}", status_code=status.HTTP_200_OK)
+async def update_client_route(
+    client_id: int,
+    client_data: CreateClientSchema,
+    service: ClientService = Depends(get_service),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    Atualiza um cliente existente.
+    """
+    return await service.update_client_service(client_id, client_data)
+
+
+@router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_client_route(
+    client_id: int,
+    service: ClientService = Depends(get_service),
+    current_user: UserModel = Depends(require_admin)
+) -> None:
+    """
+    Exclui um cliente pelo ID.
+    """
+    return await service.delete_client_service(client_id)

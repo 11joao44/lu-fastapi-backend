@@ -25,7 +25,10 @@ class UserOut(BaseModel):
     created_at: datetime
     updated_at: datetime | None = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid"
+    )
 
 class TokenResponse(BaseModel):
     access_token: str
