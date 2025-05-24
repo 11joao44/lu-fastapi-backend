@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, Numeric, Date, DateTime, func, text
 from app.core.database import Base
 
-class Products(Base):
+class ProductModel(Base):
     __tablename__ = "products"
     
     id = Column(Integer, primary_key=True)

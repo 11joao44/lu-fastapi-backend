@@ -1,6 +1,8 @@
 /venv
 .env
 main.ipynb
+erro.log
+ia_watcher.py
 
 # Ignora arquivos compilados do Python
 __pycache__/

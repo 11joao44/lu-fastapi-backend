@@ -5,9 +5,10 @@ from sqlalchemy import text
 from app.core.database import engine
 
 @pytest.mark.asyncio
-async def test_database_connection():
+async def test_database_connection() -> None:
     """
     Testa se é possível conectar e executar uma query simples no banco de dados.
+    Ideal para health check da infra de testes.
     """
     try:
         async with engine.connect() as conn:

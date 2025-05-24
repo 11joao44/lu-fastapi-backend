@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, func
 from app.core.database import Base, relationship
 
-class Clients(Base):
+class ClientModel(Base):
     __tablename__ = "clients"
     
     id = Column(Integer, primary_key=True)
@@ -13,4 +13,4 @@ class Clients(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    orders = relationship("Orders", back_populates=__tablename__)
+    orders = relationship("OrderModel", back_populates='client')
