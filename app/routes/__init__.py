@@ -1,6 +1,7 @@
 from fastapi import FastAPI
-from app.routes.users import router as auth_router
+from app.routes.users import router as router_users
 from app.routes.clients import router as router_clients
+from app.routes.products import router as router_products
 
 def create_routes(instance_fastapi: FastAPI) -> None:
         
@@ -8,5 +9,6 @@ def create_routes(instance_fastapi: FastAPI) -> None:
         def home():
                 return "API RODANDO"
 
-        instance_fastapi.include_router(auth_router)
+        instance_fastapi.include_router(router_users)
         instance_fastapi.include_router(router_clients)
+        instance_fastapi.include_router(router_products)
