@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, Body, status
+from app.models.users import UserModel
 from app.schemas.users import LoginResponse, UserRegister, UserOut, UserLogin, TokenResponse, TokenRefreshRequest
 from app.repositories.users import UserRepository
 from app.services.users import UserService
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import session_db
+from app.core.security import require_admin
 
 router = APIRouter(prefix="/auth", tags=["users"])
 
@@ -41,3 +43,7 @@ async def refresh_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token de refresh inválido ou expirado.")
     
     return TokenResponse(access_token=token, refresh_token=req.refresh_token)
+
+@router.get('/users/{user_id}', status_code=status.HTTP_200_OK, response_model=UserOut)
+async def list_user_route(user_id: int, service: UserService = Depends(get_service), admin: UserModel = Depends(require_admin)):
+    return await service.list_user_service(user_id)

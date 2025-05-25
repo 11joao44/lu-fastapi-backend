@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
@@ -21,9 +22,9 @@ class UserOut(BaseModel):
     username: str
     email: EmailStr
     is_active: bool
-    is_admin: bool
+    is_admin: Optional[bool] = False
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at:  Optional[datetime] = None
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -32,7 +33,7 @@ class UserOut(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
-    refresh_token: str | None = None
+    refresh_token:  Optional[str] = None
     token_type: str = "bearer"
 
 class LoginResponse(BaseModel):
