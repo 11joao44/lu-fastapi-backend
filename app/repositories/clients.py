@@ -55,6 +55,6 @@ class ClientRepository:
         clients = result.scalars().all()
         return clients
 
-    async def delete_client_repository(self, client_data: ClientModel):
+    async def delete_client_repository(self, client_data: ClientModel) -> None:
         await self.session.delete(client_data)
         await self.session.commit()

@@ -51,6 +51,12 @@ class UserService:
             "user": UserOut.model_validate(user)
         }
 
+    async def list_user_service(self, user_id: int) -> UserOut:
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Usuário não encontrado.")
+        return user
+
     async def refresh_token(self, refresh_token: str) -> str:
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, settings.ALGORITHM)

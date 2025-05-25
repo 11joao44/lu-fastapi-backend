@@ -38,4 +38,5 @@ httpx = "^0.28.1"
 pytest-asyncio = "^0.26.0"
 ipykernel = "^6.29.5"
 passlib = ">=1.7.4"
+aiosqlite = "^0.21.0"
 

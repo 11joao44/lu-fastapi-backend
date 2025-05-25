@@ -12,5 +12,6 @@ class OrderModel(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
-    client = relationship("ClientModel", back_populates=__tablename__)
-    user = relationship("UserModel", back_populates=__tablename__ )
+    user = relationship("UserModel", back_populates="orders")
+    client = relationship("ClientModel", back_populates="orders")
+    order_products = relationship("OrderProductModel", back_populates="order")

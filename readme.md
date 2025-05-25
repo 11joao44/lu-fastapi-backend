@@ -11,8 +11,8 @@ A solução será construída com **FastAPI**, utilizando arquitetura em camadas
 A API deve atender aos seguintes módulos:
 
 - [x] **Arquitetura**: 3-Layers Routers → Services → Repositories.
-- [X] **Autenticação (JWT)**: login, registro e refresh token.
-- [X] **Models (ORM)**: Mapeando tabelas do db em models.
+- [x] **Autenticação (JWT)**: login, registro e refresh token.
+- [x] **Models (ORM)**: Mapeando tabelas do db em models.
 - [ ] **Clientes**: CRUD completo, com filtros e validações.
 - [ ] **Produtos**: CRUD com filtros (categoria, preço, disponibilidade).
 - [ ] **Pedidos**: múltiplos produtos por pedido, status e filtros.
@@ -58,16 +58,16 @@ A API deve atender aos seguintes módulos:
 
 #### 1. users
 
-| Campo           | Tipo                         | Descrição                                    |
-|-----------------|------------------------------|----------------------------------------------|
-| id              | SERIAL PRIMARY KEY           | Identificador único                          |
-| username        | VARCHAR(64) NOT NULL UNIQUE  | Nome de usuário (login)                      |
-| email           | VARCHAR(128) NOT NULL UNIQUE | E-mail único                                 |
-| hashed_password | VARCHAR(256) NOT NULL        | Senha hash (bcrypt/passlib)                  |
-| is_active       | BOOLEAN NOT NULL DEFAULT TRUE| Usuário ativo                                |
-| is_admin        | BOOLEAN NOT NULL DEFAULT FALSE| Usuário administrador                       |
-| created_at      | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP | Data de criação              |
-| updated_at      | TIMESTAMP DEFAULT CURRENT_TIMESTAMP          | Data de atualização          |
+| Campo           | Tipo                                         | Descrição                   |
+| --------------- | -------------------------------------------- | --------------------------- |
+| id              | SERIAL PRIMARY KEY                           | Identificador único         |
+| username        | VARCHAR(64) NOT NULL UNIQUE                  | Nome de usuário (login)     |
+| email           | VARCHAR(128) NOT NULL UNIQUE                 | E-mail único                |
+| hashed_password | VARCHAR(256) NOT NULL                        | Senha hash (bcrypt/passlib) |
+| is_active       | BOOLEAN NOT NULL DEFAULT TRUE                | Usuário ativo               |
+| is_admin        | BOOLEAN NOT NULL DEFAULT FALSE               | Usuário administrador       |
+| created_at      | TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP | Data de criação             |
+| updated_at      | TIMESTAMP DEFAULT CURRENT_TIMESTAMP          | Data de atualização         |
 
 > **Função:** Usuários autenticáveis (quem pode logar/admin).
 
@@ -86,16 +86,16 @@ CREATE TABLE users (
 
 #### 2. clients
 
-| Campo       | Tipo                                 | Descrição           |
-| ----------- | ------------------------------------ | ------------------- |
-| id          | SERIAL PRIMARY KEY                   | Identificador único |
-| name        | VARCHAR(255) NOT NULL                | Nome do cliente     |
-| email       | VARCHAR(255) UNIQUE NOT NULL         | E-mail único        |
-| phone       | VARCHAR(20) UNIQUE                   | Telefone único      |
-| cpf\_cnpj   | VARCHAR(20) UNIQUE NOT NULL          | CPF ou CNPJ único   |
-| address     | TEXT UNIQUE NOT NULL               | Endereço            |
-| created\_at | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Data de criação     |
-| updated\_at | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Data de atualização |
+| Campo      | Tipo                                | Descrição           |
+| ---------- | ----------------------------------- | ------------------- |
+| id         | SERIAL PRIMARY KEY                  | Identificador único |
+| name       | VARCHAR(255) NOT NULL               | Nome do cliente     |
+| email      | VARCHAR(255) UNIQUE NOT NULL        | E-mail único        |
+| phone      | VARCHAR(20) UNIQUE                  | Telefone único      |
+| cpf_cnpj   | VARCHAR(20) UNIQUE NOT NULL         | CPF ou CNPJ único   |
+| address    | TEXT UNIQUE NOT NULL                | Endereço            |
+| created_at | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de criação     |
+| updated_at | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de atualização |
 
 > **Função:** Clientes finais do negócio.
 > **Regra:** email e cpf_cnpj devem ser únicos.
@@ -115,19 +115,19 @@ CREATE TABLE clients (
 
 #### 3. products
 
-| Campo            | Tipo                                 | Descrição                   |
-| ---------------- | ------------------------------------ | --------------------------- |
-| id               | SERIAL PRIMARY KEY                   | Identificador único         |
-| name             | VARCHAR(255) NOT NULL                | Nome do produto             |
-| description      | TEXT                                 | Descrição                   |
-| price            | DECIMAL(10, 2) NOT NULL              | Preço                       |
-| barcode          | VARCHAR(50) UNIQUE                   | Código de barras único      |
-| section          | VARCHAR(100)                         | Seção (ex: bebida, limpeza) |
-| stock            | INTEGER NOT NULL DEFAULT 0           | Quantidade em estoque       |
-| expiration\_date | DATE                                 | Data de validade            |
-| image\_url       | TEXT                                 | URL da imagem               |
-| created\_at      | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Data de criação             |
-| updated\_at      | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Data de atualização         |
+| Campo           | Tipo                                | Descrição                   |
+| --------------- | ----------------------------------- | --------------------------- |
+| id              | SERIAL PRIMARY KEY                  | Identificador único         |
+| name            | VARCHAR(255) NOT NULL               | Nome do produto             |
+| description     | TEXT                                | Descrição                   |
+| price           | DECIMAL(10, 2) NOT NULL             | Preço                       |
+| barcode         | VARCHAR(50) UNIQUE                  | Código de barras único      |
+| section         | VARCHAR(100)                        | Seção (ex: bebida, limpeza) |
+| stock           | INTEGER NOT NULL DEFAULT 0          | Quantidade em estoque       |
+| expiration_date | DATE                                | Data de validade            |
+| image_url       | TEXT                                | URL da imagem               |
+| created_at      | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de criação             |
+| updated_at      | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de atualização         |
 
 > **Função:** Produtos ofertados, com controle de estoque e seção.
 
@@ -149,15 +149,15 @@ CREATE TABLE products (
 
 #### 4. orders
 
-| Campo         | Tipo                                 | Descrição                          |
-| ------------- | ------------------------------------ | ---------------------------------- |
-| id            | SERIAL PRIMARY KEY                   | Identificador único                |
-| client\_id    | INTEGER NOT NULL                     | Cliente (FK → clients.id)          |
-| user\_id      | INTEGER NOT NULL                     | Usuário que lançou (FK → users.id) |
-| status        | VARCHAR(20) NOT NULL                 | Status do pedido                   |
-| total\_amount | NUMERIC(10, 2) NOT NULL              | Valor total                        |
-| created\_at   | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Data de criação                    |
-| updated\_at   | TIMESTAMP DEFAULT CURRENT\_TIMESTAMP | Data de atualização                |
+| Campo        | Tipo                                | Descrição                          |
+| ------------ | ----------------------------------- | ---------------------------------- |
+| id           | SERIAL PRIMARY KEY                  | Identificador único                |
+| client_id    | INTEGER NOT NULL                    | Cliente (FK → clients.id)          |
+| user_id      | INTEGER NOT NULL                    | Usuário que lançou (FK → users.id) |
+| status       | VARCHAR(20) NOT NULL                | Status do pedido                   |
+| total_amount | NUMERIC(10, 2) NOT NULL             | Valor total                        |
+| created_at   | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de criação                    |
+| updated_at   | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de atualização                |
 
 > **Função:** Pedidos, com status, valor total, data, ligação ao cliente e usuário que criou.
 
@@ -172,5 +172,33 @@ CREATE TABLE public.orders (
     updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES public.clients(id),
     FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+```
+
+#### 5. order_products
+
+| Campo           | Tipo                                | Descrição                             |
+| --------------- | ----------------------------------- | ------------------------------------- |
+| id              | SERIAL PRIMARY KEY                  | Identificador único                   |
+| order_id        | INTEGER NOT NULL                    | Order (FK → orders.id)                |
+| product_id      | INTEGER NOT NULL                    | Product que lançou (FK → products.id) |
+| quantity        | INTEGER NOT NULL                    | quantidade de pedidos                 |
+| price_at_amount | NUMERIC(10, 2) NOT NULL             | Valor total                           |
+| created_at      | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de criação                       |
+| updated_at      | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | Data de atualização                   |
+
+> **Função:** permitir pedido com múltiplos produtos e filtro por seção.
+
+```sql
+CREATE TABLE order_products (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    price_at_moment NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 ```
