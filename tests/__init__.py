@@ -1,0 +1,1 @@
+# __init__.py é para indicar que a pasta é um pacote Python.

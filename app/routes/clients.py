@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.clients import ClientService
 from app.core.security import get_current_user, require_admin
 from app.core.database import session_db
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from pydantic import EmailStr
+from typing import Optional
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
@@ -15,8 +16,8 @@ def get_service(db: AsyncSession = Depends(session_db)) -> ClientService:
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def list_clients_route(
-    name: str | None = None,
-    email: EmailStr | None = None,
+    name: Optional[str] = Query(None, description="Nome do cliente que deseja filtrar", examples={"exemplo": {"name": "Gustavo"}}),
+    email: Optional[EmailStr] = Query(None, description="E-mail do cliente que deseja filtrar", examples={"exemplo": {"email": "11joao44@gmail.com"}}),
     limit: int = 10, offset: int = 0,
     service: ClientService = Depends(get_service),
     current_user: UserModel = Depends(get_current_user)
