@@ -1,40 +1,39 @@
 # 📦 Lu FastAPI – Backend Challenge
 
-Este repositório contém a implementação da **API RESTful** da empresa **Lu Estilo**, com foco em facilitar a comunicação e automação do time comercial com clientes e operações internas.
+Este repositório contém a implementação da **API RESTful** da empresa **Lu Estilo**, projetada para automatizar o fluxo do time comercial com clientes e operações internas.  
 
-A solução será construída com **FastAPI**, utilizando arquitetura em camadas, autenticação JWT e integração futura com WhatsApp.
+A aplicação é construída com **FastAPI**, seguindo arquitetura em camadas (Routers → Services → Repositories), autenticação JWT e pronta para integração com WhatsApp.
 
 ---
 
 ## 🧩 Escopo do Projeto
 
-A API deve atender aos seguintes módulos:
+A API oferece os seguintes módulos:
 
-- [x] **Arquitetura**: 3-Layers Routers → Services → Repositories.
-- [x] **Autenticação (JWT)**: login, registro e refresh token.
-- [x] **Models (ORM)**: Mapeando tabelas do db em models.
-- [ ] **Clientes**: CRUD completo, com filtros e validações.
-- [ ] **Produtos**: CRUD com filtros (categoria, preço, disponibilidade).
-- [ ] **Pedidos**: múltiplos produtos por pedido, status e filtros.
-- [ ] **Integração WhatsApp**: envio automático de mensagens para eventos comerciais.
-- [ ] **Camadas de permissão**: admin e usuário comum.
-- [ ] **Validações robustas** e tratamento de erros com consistência.
-- [ ] **Testes com pytest** (unitários e integração).
-- [ ] **Deploy com Docker**.
+- [x] **Arquitetura**: 3 camadas (Routes → Services → Repositories)  
+- [x] **Autenticação (JWT)**: login, registro, refresh token  
+- [x] **Models (ORM)**: mapeamento das tabelas no PostgreSQL via SQLAlchemy  
+- [x] **Clientes**: CRUD completo, filtros e validações  
+- [x] **Produtos**: CRUD com filtros de categoria, preço, disponibilidade  
+- [x] **Pedidos**: múltiplos produtos por pedido, status e filtros  
+- [x] **Itens de Pedido**: associação `order_products`, filtros por data, preço e quantidade  
+- [x] **Permissões**: rotas protegidas para admin e usuário comum  
+- [x] **Testes** com pytest (unitários e de integração)  
+- [x] **Deploy** com Docker (local e cloud)
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
 
-- Python 3.12
-- FastAPI
-- SQLAlchemy 2.x
-- PostgreSQL
-- Alembic (migrações)
-- Pydantic 2.x
-- Uvicorn
-- Pytest
-- Docker
+- **Python 3.12**  
+- **FastAPI**  
+- **SQLAlchemy 2.x** + **asyncpg**  
+- **PostgreSQL**  
+- **Alembic** (migrações)  
+- **Pydantic 2.x**  
+- **Uvicorn** (ASGI server)  
+- **Pytest** (testes)  
+- **Docker** + **docker-compose**  
 
 ---
 
@@ -49,6 +48,42 @@ A API deve atender aos seguintes módulos:
 | `Hotfix:`  | Correções urgentes/em produção (usado com deploys ou bugs críticos)                          |
 
 ---
+
+## 🛠️ Como Rodar Localmente com Docker
+
+### 1. Preparar variáveis de ambiente
+
+Na raiz do projeto, crie um arquivo .env com:
+
+```env
+DATABASE_URL=postgresql+asyncpg://<user>:<password>@<host>:<port>/<dbname>
+SECRET_KEY=<sua_secret_key_jwt>
+ALGORITHM=HS256
+```
+
+### 2. Build & Up com Docker Compose
+
+```bash
+# Builda as imagens, instalando dependências
+docker compose build --no-cache
+
+# Sobe containers em background (web + opcional db local)
+docker compose up -d
+```
+
+### 3. Testar endpoints
+
+```bash
+poetry run pytest tests/
+
+ou
+
+poetry run pytest -v
+```
+
+>Swagger UI: [LINK LOCAL](http://localhost:8000/docs)
+>Swagger UI: [LINK PRODUÇÃO](https://lu-fastapi-backend-docker.onrender.com/docs)
+>Collection Postman: Em anexo e-mail.
 
 ## 📦 Modelagem de Banco de Dados
 
