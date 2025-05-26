@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, String, Numeric, DateTime, f
 from app.core.database import Base, relationship
 
 class OrderModel(Base):
+    nome = "Pedido"
     __tablename__ = 'orders'
     
     id = Column(Integer, primary_key=True)
@@ -14,4 +15,4 @@ class OrderModel(Base):
     
     user = relationship("UserModel", back_populates="orders")
     client = relationship("ClientModel", back_populates="orders")
-    order_products = relationship("OrderProductModel", back_populates="order")
+    order_products = relationship("OrderProductsModel", back_populates="order")

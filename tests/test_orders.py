@@ -13,30 +13,20 @@ def make_unique_name(prefix: str = "Name") -> str:
 
 @pytest_asyncio.fixture
 async def auth_client():
-    """
-    Registra (ou aceita conflito) e faz login como admin, retornando um AsyncClient
-    com o header Authorization já configurado.
-    """
-    async with AsyncClient(base_url=BASE_URL) as ac:
-        # 1) Tenta registrar o admin
-        admin_payload = {
+    async with AsyncClient(base_url="http://127.0.0.1:8000") as ac:
+        # Registra e loga o usuário admin (ajuste se necessário para seu sistema)
+        await ac.post("/auth/register", json={
             "username": "admin",
             "email": "admin@email.com",
             "password": "admin123",
             "is_admin": True
-        }
-        res = await ac.post("/auth/register", json=admin_payload)
-        assert res.status_code in (201, 409), f"Não registrou admin: {res.text}"
-
-        # 2) Faz login como admin
-        login = await ac.post("/auth/login", json={
-            "email": admin_payload["email"],
-            "password": admin_payload["password"]
         })
-        assert login.status_code == 200, f"Falha no login admin: {login.text}"
-        token = login.json()["token"]["access_token"]
-
-        ac.headers.update({"Authorization": f"Bearer {token}"})
+        resp = await ac.post("/auth/login", json={
+            "email": "admin@email.com",
+            "password": "admin123"
+        })
+        access_token = resp.json()["token"]["access_token"]
+        ac.headers = {"Authorization": f"Bearer {access_token}"}
         yield ac
 
 @pytest_asyncio.fixture

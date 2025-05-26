@@ -9,7 +9,7 @@ from app.core.database import session_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(session_db)):
+async def locked_route(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(session_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, 
         detail="Não autenticado.", 
@@ -36,7 +36,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     
     return user
 
-def require_admin(user: UserModel = Depends(get_current_user)):
+def require_admin(user: UserModel = Depends(locked_route)):
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ação restrita a administradores.")
     return user

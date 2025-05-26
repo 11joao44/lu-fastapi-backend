@@ -40,3 +40,7 @@ ipykernel = "^6.29.5"
 passlib = ">=1.7.4"
 aiosqlite = "^0.21.0"
 
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+

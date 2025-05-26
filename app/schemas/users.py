@@ -8,11 +8,19 @@ class UserSchema(BaseModel):
     is_active: bool
     is_admin: bool
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid"
+    )
+
 class UserRegister(BaseModel):
     username: str
     email: EmailStr
     password: str
-
+class UserDetailsSchema(UserSchema):
+    username: str
+    email: EmailStr
+    password: str
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
