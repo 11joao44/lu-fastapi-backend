@@ -2,11 +2,13 @@ from datetime import datetime
 from typing import Optional
 from fastapi import HTTPException, status
 from app.models.order_products import OrderProductsModel
+from app.models.orders import OrderModel
+from app.models.products import ProductModel
 from app.repositories.orders import OrderRepository
 from app.repositories.products import ProductRepository
 from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema, OrderProductsUpdateSchema
 from app.repositories.order_products import OrderProductsRepository
-
+from app.utils.not_found import not_found
 
 class OrderProductsService:
     def __init__(self,
@@ -20,8 +22,7 @@ class OrderProductsService:
 
     async def get_by_id(self, id: int) -> OrderProductsDetailsSchema:
         data = await self.order_products_repo.get_by_id(id)
-        if not data:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Itens do Pedido não encotrado.")
+        not_found(data, OrderProductsModel, id)
         return data
 
     async def list(self,     
@@ -34,21 +35,17 @@ class OrderProductsService:
         date_end: Optional[datetime] = None
     ) -> list[OrderProductsDetailsSchema]:
         data = await self.order_products_repo.list(order_id, product_id, quantity, price_at_moment_min, price_at_moment_max, date_start, date_end)
-        if not data:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Itens do Pedido não encotrado.")
+        not_found(data, OrderProductsModel)
         return data
 
     async def create(self, data: OrderProductsSchema) -> OrderProductsSchema:
 
         if await self.order_products_repo.get_by_order_and_product(data.order_id, data.product_id):
             raise HTTPException(status.HTTP_409_CONFLICT, f"Já existe um item para order_id={data.order_id} e product_id={data.product_id}.")
-
-        if not await self.order_repo.get_by_id(data.order_id):
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Nenhum pedido foi encontrado referente ao ID: {data.order_id}")
         
-        if not await self.product_repo.get_by_id(data.product_id):
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Nenhum produto foi encontrado referente ao ID: {data.product_id}")
-
+        not_found(await self.order_repo.get_by_id(data.order_id), OrderModel, data.order_id)
+        not_found(await self.order_repo.get_by_id(data.product_id), ProductModel, data.product_id)
+        
         order_product = OrderProductsModel(
             order_id = data.order_id,
             product_id = data.product_id,
@@ -60,15 +57,12 @@ class OrderProductsService:
     
     async def update(self, id: int, data: OrderProductsUpdateSchema) -> OrderProductsSchema:
         base_data = await self.order_products_repo.get_by_id(id)
-
-        if not base_data:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Itens do Pedido não encotrado.")
-        
+        not_found(base_data, OrderProductsModel, id)
         return await self.order_products_repo.update(base_data, data)
         
-    async def delete(self, id: int, data: OrderProductsSchema) -> None:
-        delete_data = await self.product_repo.get_by_id(id)
-        if not delete_data:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Itens do Pedido não encotrado.")
+    async def delete(self, id: int) -> None:
+        data = await self.product_repo.get_by_id(id)
+        not_found(data, OrderProductsModel, id)
+        await self.order_products_repo.delete(data)
         
         

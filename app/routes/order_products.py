@@ -83,5 +83,5 @@ async def update(data: OrderProductsUpdateSchema, service: OrderProductsService 
     return await service.update(data)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete(id: int, data: OrderProductsSchema, service: OrderProductsService = Depends(get_service), admin: UserModel = Depends(require_admin)):
-    return await service.delete(id, data)
+async def delete(id: int, service: OrderProductsService = Depends(get_service), admin: UserModel = Depends(require_admin)):
+    return await service.delete(id)
