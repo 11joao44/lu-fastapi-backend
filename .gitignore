@@ -3,8 +3,6 @@
 main.ipynb
 erro.log
 ia_watcher.py
-Dockerfile
-docker-compose.yml
 
 # Ignora arquivos compilados do Python
 .pytest_cache
