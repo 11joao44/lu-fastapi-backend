@@ -1,7 +1,7 @@
-from typing import Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, PositiveInt
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 class OrderProductsSchema(BaseModel):
     order_id: int
@@ -20,10 +20,10 @@ class OrderProductsDetailsSchema(OrderProductsSchema):
     updated_at: datetime
     
 class OrderProductsUpdateSchema(BaseModel):
-    order_id: Optional[int] = None
-    product_id: Optional[int] = None
-    quantity: Optional[int] = None
+    quantity: Optional[PositiveInt]
     price_at_moment: Optional[Decimal] = None
-    class Config:
-        extra = "forbid"
-        orm_mode = True
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid"
+    )

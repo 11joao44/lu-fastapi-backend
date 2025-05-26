@@ -8,7 +8,7 @@ from app.routes.order_products import router as router_order_products
 def create_routes(instance_fastapi: FastAPI) -> None:
         
         @instance_fastapi.get('/')
-        def home(): return "API RODANDO"
+        def home(): return {"details": "Olá, FastAPI está funcionando!"}
 
         instance_fastapi.include_router(router_users)
         instance_fastapi.include_router(router_orders)

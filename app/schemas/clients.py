@@ -25,6 +25,8 @@ class ClientUpdateSchema(BaseModel):
     phone: Optional[str] = None
     cpf_cnpj: Optional[str] = None
     address: Optional[str] = None
-    class Config:
-        extra = "forbid"
-        orm_mode = True
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid"
+    )

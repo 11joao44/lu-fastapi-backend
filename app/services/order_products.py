@@ -44,7 +44,7 @@ class OrderProductsService:
             raise HTTPException(status.HTTP_409_CONFLICT, f"Já existe um item para order_id={data.order_id} e product_id={data.product_id}.")
         
         not_found(await self.order_repo.get_by_id(data.order_id), OrderModel, data.order_id)
-        not_found(await self.order_repo.get_by_id(data.product_id), ProductModel, data.product_id)
+        not_found(await self.product_repo.get_by_id(data.product_id), ProductModel, data.product_id)
         
         order_product = OrderProductsModel(
             order_id = data.order_id,
@@ -56,6 +56,9 @@ class OrderProductsService:
         return await self.order_products_repo.create(order_product)
     
     async def update(self, id: int, data: OrderProductsUpdateSchema) -> OrderProductsSchema:
+        not_found(await self.order_repo.get_by_id(data.order_id), OrderModel, data.order_id)
+        not_found(await self.product_repo.get_by_id(data.product_id), ProductModel, data.product_id)
+        
         base_data = await self.order_products_repo.get_by_id(id)
         not_found(base_data, OrderProductsModel, id)
         return await self.order_products_repo.update(base_data, data)

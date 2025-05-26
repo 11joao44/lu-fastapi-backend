@@ -19,16 +19,15 @@ class OrderDetailsSchema(OrderSchema):
     id: int
     created_at: datetime
     updated_at: datetime
-    model_config = ConfigDict(
-        from_attributes=True,
-        extra="forbid"
-    )
+    
 
 class OrderUpdateSchema(BaseModel):
     client_id: Optional[int] = None
     user_id: Optional[int] = None
     status: Optional[str] = None
     total_amount: Optional[Decimal] = None
-    class Config:
-        extra = "forbid"
-        orm_mode = True
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid"
+    )

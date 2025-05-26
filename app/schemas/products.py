@@ -32,6 +32,8 @@ class ProductUpdateSchema(BaseModel):
     stock: Optional[int] = None
     expiration_date: Optional[date] = None
     image_url: Optional[HttpUrl] = None
-    class Config:
-        extra = "forbid"
-        orm_mode = True
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid"
+    )

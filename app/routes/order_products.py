@@ -79,8 +79,8 @@ async def create(data: OrderProductsSchema, service: OrderProductsService = Depe
     return await service.create(data)
 
 @router.patch("/{id}", status_code=status.HTTP_200_OK, response_model=OrderProductsSchema)
-async def update(data: OrderProductsUpdateSchema, service: OrderProductsService = Depends(get_service)):
-    return await service.update(data)
+async def update(id: int, data: OrderProductsUpdateSchema, service: OrderProductsService = Depends(get_service)):
+    return await service.update(id, data)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete(id: int, service: OrderProductsService = Depends(get_service), admin: UserModel = Depends(require_admin)):
