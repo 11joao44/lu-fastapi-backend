@@ -20,11 +20,11 @@ class ClientSchema(CreateClientSchema):
     updated_at: datetime
 
 class ClientUpdateSchema(BaseModel):
-    name: Optional[str]
-    email: Optional[EmailStr]
-    phone: Optional[str]
-    cpf_cnpj: Optional[str]
-    address: Optional[str]
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    cpf_cnpj: Optional[str] = None
+    address: Optional[str] = None
     class Config:
         extra = "forbid"
         orm_mode = True

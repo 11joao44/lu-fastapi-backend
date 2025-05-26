@@ -20,10 +20,10 @@ class OrderProductsDetailsSchema(OrderProductsSchema):
     updated_at: datetime
     
 class OrderProductsUpdateSchema(BaseModel):
-    order_id: Optional[int]
-    product_id: Optional[int]
-    quantity: Optional[int]
-    price_at_moment: Optional[Decimal]
+    order_id: Optional[int] = None
+    product_id: Optional[int] = None
+    quantity: Optional[int] = None
+    price_at_moment: Optional[Decimal] = None
     class Config:
         extra = "forbid"
         orm_mode = True

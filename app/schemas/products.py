@@ -24,14 +24,14 @@ class ProductDetailsSchema(ProductSchema):
     updated_at: datetime
 
 class ProductUpdateSchema(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-    price: Optional[Decimal]
-    barcode: Optional[str]
-    section: Optional[str]
-    stock: Optional[int]
-    expiration_date: Optional[date]
-    image_url: Optional[HttpUrl]
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[Decimal] = None
+    barcode: Optional[str] = None
+    section: Optional[str] = None
+    stock: Optional[int] = None
+    expiration_date: Optional[date] = None
+    image_url: Optional[HttpUrl] = None
     class Config:
         extra = "forbid"
         orm_mode = True
