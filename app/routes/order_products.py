@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.orders import OrderRepository
 from app.repositories.products import ProductRepository
 from app.core.security import locked_route, require_admin
-from app.schemas.order_products import OrderProductsSchema
+from app.schemas.order_products import OrderProductsSchema, OrderProductsUpdateSchema
 from app.services.order_products import OrderProductsService
 from app.repositories.order_products import OrderProductsRepository
 
@@ -26,8 +26,8 @@ async def list(data: OrderProductsSchema, service: OrderProductsService = Depend
 async def create(data: OrderProductsSchema, service: OrderProductsService = Depends(get_service)):
     return await service.create(data)
 
-@router.put("/{id}", status_code=status.HTTP_200_OK, response_model=OrderProductsSchema)
-async def update(data: OrderProductsSchema, service: OrderProductsService = Depends(get_service)):
+@router.patch("/{id}", status_code=status.HTTP_200_OK, response_model=OrderProductsSchema)
+async def update(data: OrderProductsUpdateSchema, service: OrderProductsService = Depends(get_service)):
     return await service.update(data)
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)

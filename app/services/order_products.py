@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from app.models.order_products import OrderProductsModel
 from app.repositories.orders import OrderRepository
 from app.repositories.products import ProductRepository
-from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema
+from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema, OrderProductsUpdateSchema
 from app.repositories.order_products import OrderProductsRepository
 
 
@@ -58,7 +58,7 @@ class OrderProductsService:
 
         return await self.order_products_repo.create(order_product)
     
-    async def update(self, id: int, data: OrderProductsSchema) -> OrderProductsSchema:
+    async def update(self, id: int, data: OrderProductsUpdateSchema) -> OrderProductsSchema:
         base_data = await self.order_products_repo.get_by_id(id)
 
         if not base_data:

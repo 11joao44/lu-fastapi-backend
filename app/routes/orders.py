@@ -7,7 +7,7 @@ from app.repositories.clients import ClientRepository
 from app.repositories.orders import OrderRepository
 from app.repositories.users import UserRepository
 from app.services.orders import OrderService
-from app.schemas.orders import OrderDetailsSchema, OrderSchema
+from app.schemas.orders import OrderDetailsSchema, OrderSchema, OrderUpdateSchema
 from app.core.database import session_db
 from app.core.security import locked_route, require_admin
 
@@ -63,8 +63,8 @@ async def create(data: OrderSchema, service: OrderService = Depends(get_service)
     return await service.create(data)
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK, response_model=OrderDetailsSchema)
-async def update(id: int, data: OrderSchema, service: OrderService = Depends(get_service)):
+@router.patch("/{id}", status_code=status.HTTP_200_OK, response_model=OrderDetailsSchema)
+async def update(id: int, data: OrderUpdateSchema, service: OrderService = Depends(get_service)):
     return await service.update(id, data)
 
 

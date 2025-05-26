@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.models.order_products import OrderProductsModel
-from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema
+from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema, OrderProductsUpdateSchema
 
 class OrderProductsRepository:
     def __init__(self, session: AsyncSession):
@@ -59,7 +59,7 @@ class OrderProductsRepository:
         await self.session.refresh(data)
         return data
     
-    async def update(self, base_data: OrderProductsSchema, update_data: OrderProductsSchema) -> OrderProductsSchema:
+    async def update(self, base_data: OrderProductsSchema, update_data: OrderProductsUpdateSchema) -> OrderProductsSchema:
         for key, value in update_data.model_dump(exclude_unset=True).items():
             setattr(base_data, key, value)
 

@@ -119,7 +119,7 @@ async def test_update_order(auth_client, make_client, make_user):
 
     # atualiza status
     updated = {**payload, "status": "entregue"}
-    res = await auth_client.put(f"/orders/{order_id}", json=updated)
+    res = await auth_client.patch(f"/orders/{order_id}", json=updated)
     assert res.status_code == 200
     assert res.json()["status"] == "entregue"
 

@@ -74,7 +74,7 @@ async def test_update_product(auth_admin_client):
     print("id falha:", create_resp.json())
     updated_data = dict(product_data)
     updated_data["name"] = "Produto Atualizado"
-    response = await auth_admin_client.put(f"/products/{product_id}", json=updated_data)
+    response = await auth_admin_client.patch(f"/products/{product_id}", json=updated_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "Produto Atualizado"

@@ -2,7 +2,7 @@ from typing import Optional
 from decimal import Decimal
 from app.models.products import ProductModel
 from app.repositories.products import ProductRepository
-from app.schemas.products import ProductSchema
+from app.schemas.products import ProductSchema, ProductUpdateSchema
 from app.utils.not_found import not_found
 from fastapi import HTTPException, status
 
@@ -44,7 +44,7 @@ class ProductService:
         return await self.product_repo.create(product)
 
 
-    async def update(self, id: int, data: ProductSchema) -> ProductModel:
+    async def update(self, id: int, data: ProductUpdateSchema) -> ProductModel:
         product = await self.product_repo.get_by_id(id)
         not_found(product, ProductModel, id)
         return await self.product_repo.update(product, data)

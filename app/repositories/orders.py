@@ -6,7 +6,7 @@ from sqlalchemy import select
 from app.models.products import ProductModel
 from app.models.order_products import OrderProductsModel
 from app.models.orders import OrderModel
-from app.schemas.orders import OrderDetailsSchema, OrderSchema
+from app.schemas.orders import OrderDetailsSchema, OrderSchema, OrderUpdateSchema
 
 class OrderRepository:
     def __init__(self, session: AsyncSession):
@@ -53,7 +53,7 @@ class OrderRepository:
         await self.session.refresh(data)
         return data
     
-    async def update(self, base_data: OrderModel, update_data: OrderSchema) -> OrderModel:
+    async def update(self, base_data: OrderModel, update_data: OrderUpdateSchema) -> OrderModel:
         for key, value in update_data.model_dump(exclude_unset=True).items():
             setattr(base_data, key, value)
 

@@ -1,5 +1,5 @@
 from app.models.users import UserModel
-from app.schemas.clients import CreateClientSchema, ClientSchema
+from app.schemas.clients import ClientUpdateSchema, CreateClientSchema, ClientSchema
 from app.repositories.clients import ClientRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.clients import ClientService
@@ -35,8 +35,8 @@ async def create(data: CreateClientSchema, service: ClientService = Depends(get_
     return await service.create(data)
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK)
-async def update(id: int, data: CreateClientSchema,  service: ClientService = Depends(get_service)):
+@router.patch("/{id}", status_code=status.HTTP_200_OK)
+async def update(id: int, data: ClientUpdateSchema,  service: ClientService = Depends(get_service)):
     return await service.update(id, data)
 
 

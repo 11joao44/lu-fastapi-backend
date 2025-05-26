@@ -6,7 +6,7 @@ from typing import Optional
 from app.core.security import  locked_route, require_admin
 from app.models.users import UserModel
 from app.repositories.products import ProductRepository
-from app.schemas.products import ProductDetailsSchema, ProductSchema
+from app.schemas.products import ProductDetailsSchema, ProductSchema, ProductUpdateSchema
 from app.services.products import ProductService
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -37,8 +37,8 @@ async def create(data: ProductSchema, service: ProductService = Depends(get_serv
     return await service.create(data)
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK, response_model=ProductDetailsSchema)
-async def update(id: int, data: ProductSchema, service: ProductService = Depends(get_service)):
+@router.patch("/{id}", status_code=status.HTTP_200_OK, response_model=ProductDetailsSchema)
+async def update(id: int, data: ProductUpdateSchema, service: ProductService = Depends(get_service)):
     return await service.update(id, data)
 
 

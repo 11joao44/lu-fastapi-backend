@@ -6,7 +6,7 @@ from app.models.orders import OrderModel
 from app.repositories.clients import ClientRepository
 from app.repositories.orders import OrderRepository
 from app.repositories.users import UserRepository
-from app.schemas.orders import OrderDetailsSchema, OrderSchema
+from app.schemas.orders import OrderDetailsSchema, OrderSchema, OrderUpdateSchema
 from app.utils.not_found import not_found
 
 class OrderService:
@@ -53,7 +53,7 @@ class OrderService:
         return await self.order_repo.create(order)
 
 
-    async def update(self, id: int, data: OrderSchema) -> OrderModel:
+    async def update(self, id: int, data: OrderUpdateSchema) -> OrderModel:
         order = await self.order_repo.get_by_id(id)
         not_found(order, OrderModel, id)
         return await self.order_repo.update(order, data)

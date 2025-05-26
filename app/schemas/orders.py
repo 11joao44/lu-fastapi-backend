@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from app.schemas.products import ProductSchema
 from datetime import datetime
@@ -23,4 +23,12 @@ class OrderDetailsSchema(OrderSchema):
         from_attributes=True,
         extra="forbid"
     )
-    
+
+class OrderUpdateSchema(BaseModel):
+    client_id: Optional[int]
+    user_id: Optional[int]
+    status: Optional[str]
+    total_amount: Optional[Decimal]
+    class Config:
+        extra = "forbid"
+        orm_mode = True

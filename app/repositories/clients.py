@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from pydantic import EmailStr
 from typing import Any, List, Optional
 
-from app.schemas.clients import CreateClientSchema
+from app.schemas.clients import ClientUpdateSchema, CreateClientSchema
  
 class ClientRepository:
     def __init__(self, session: AsyncSession):
@@ -41,8 +41,8 @@ class ClientRepository:
         await self.session.commit()
         await self.session.refresh(data)
         return data
-     
-    async def update(self, base_data: ClientModel, update_data: CreateClientSchema) -> ClientModel:
+    
+    async def update(self, base_data: ClientModel, update_data: ClientUpdateSchema) -> ClientModel:
         for key, value in update_data.model_dump(exclude_unset=True).items():
             setattr(base_data, key, value)
         await self.session.commit()

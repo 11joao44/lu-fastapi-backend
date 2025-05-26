@@ -4,7 +4,7 @@ from typing import Optional
 from decimal import Decimal
 
 from app.models.products import ProductModel
-from app.schemas.products import ProductSchema
+from app.schemas.products import ProductSchema, ProductUpdateSchema
  
 class ProductRepository:
     def __init__(self, session: AsyncSession):
@@ -55,7 +55,7 @@ class ProductRepository:
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def update(self, base_data: ProductModel, update_data: ProductSchema) -> ProductModel:
+    async def update(self, base_data: ProductModel, update_data: ProductUpdateSchema) -> ProductModel:
         for key, value in update_data.model_dump(exclude_unset=True).items():
             setattr(base_data, key, value)
 

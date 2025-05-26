@@ -1,5 +1,5 @@
 from app.repositories.clients import ClientRepository
-from app.schemas.clients import CreateClientSchema
+from app.schemas.clients import ClientUpdateSchema, CreateClientSchema
 from app.models.clients import ClientModel
 from app.utils.not_found import not_found
 from fastapi import HTTPException, status
@@ -36,7 +36,7 @@ class ClientService:
 
         return await self.client_repo.create(client)
 
-    async def update(self, id: int, data: CreateClientSchema) -> ClientModel:
+    async def update(self, id: int, data: ClientUpdateSchema) -> ClientModel:
         client = await self.client_repo.get_by_id(id)
         not_found(client, ClientModel, id)
         return await self.client_repo.update(client, data)

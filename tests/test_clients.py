@@ -70,7 +70,7 @@ async def test_update_client(auth_client):
     client_id = create_resp.json()["id"]
     updated_data = dict(client_data)
     updated_data["name"] = "Novo Nome"
-    response = await auth_client.put(f"/clients/{client_id}", json=updated_data)
+    response = await auth_client.patch(f"/clients/{client_id}", json=updated_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "Novo Nome"
