@@ -20,11 +20,11 @@ RUN pip install --upgrade pip \
 # Cache de dependências
 COPY pyproject.toml poetry.lock* /app/
 
-# Instala apenas dependências de runtime
+# Instala apenas as deps de runtime (ignora dev)
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+    && poetry install --no-interaction --no-ansi --without dev --no-root
 
-# Código da aplicação
+# Copia o código da aplicação
 COPY . /app
 
 ########################################
@@ -37,10 +37,11 @@ WORKDIR /app
 # Cria usuário não-root
 RUN useradd --create-home appuser
 
-# Copia libs e binários
+# Copia libs e binários instalados na etapa builder
 COPY --from=builder /usr/local/lib/python3.12 /usr/local/lib/python3.12
 COPY --from=builder /usr/local/bin /usr/local/bin
-# Copia aplicação
+
+# Copia a aplicação
 COPY --from=builder /app /app
 
 # Ajusta permissões
@@ -54,10 +55,10 @@ ENV PYTHONUNBUFFERED=1 \
 
 EXPOSE 8000
 
+# Opcional: endpoint /health para healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s \
-  CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:8000/health || exit 1
 
-CMD ["uvicorn", "app.main:app", \
-     "--host", "0.0.0.0", "--port", "8000", \
-     "--workers", "${UVICORN_WORKERS}", \
-     "--reload", "${UVICORN_RELOAD}"]
+# Comando padrão de inicialização
+ENTRYPOINT ["sh", "-c"]
+CMD ["uvicorn main:app --host 0.0.0.0 --port 8000 --workers $UVICORN_WORKERS"]

@@ -17,20 +17,3 @@ services:
       retries: 3
       start_period: 5s
     restart: unless-stopped
-# Se precisar de um banco local para dev, descomente:
-#  db:
-#    image: postgres:15
-#    container_name: lu-fastapi-db
-#    environment:
-#      POSTGRES_USER: user
-#      POSTGRES_PASSWORD: password
-#      POSTGRES_DB: mydb
-#    ports:
-#      - "5432:5432"
-#    volumes:
-#      - pg_data:/var/lib/postgresql/data
-#    restart: unless-stopped
-#
-#volumes:
-#  pg_data:
-#    driver: local
