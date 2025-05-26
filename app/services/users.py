@@ -8,19 +8,20 @@ from app.core.config import settings
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 
+from app.utils.not_found import not_found
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
         
-    def hash_password(self, password: str) -> str:
-        return pwd_context.hash(password)
+    async def list(self, id: int) -> UserModel:
+        user = await self.user_repo.get_by_id(id)
+        not_found(user, UserModel, id)
+        return user
     
-    def verify_password(self, password: str, hash_password: str) -> bool:
-        return pwd_context.verify(password, hash_password)
-    
-    async def register_user_service(self, data: UserRegister) -> UserOut:
+    async def create(self, data: UserRegister) -> UserModel:
         
         if await self.user_repo.get_by_email(data.email):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado.")
@@ -35,8 +36,24 @@ class UserService:
         )
          
         return await self.user_repo.create(user)
+
+    async def update(self, id: int, data: UserRegister) -> UserModel:
+        user = await self.user_repo.get_by_id(id)
+        not_found(user, UserModel, id)
+        return await self.user_repo.update(user, data)
+
+    async def delete(self, id: int) -> None:
+        user = await self.user_repo.get_by_id(id)
+        not_found(user, UserModel, id)
+        await self.user_repo.delete(user)
+
+    def hash_password(self, password: str) -> str:
+        return pwd_context.hash(password)
     
-    async def login_user_service(self, data: UserLogin) -> Dict[str, Any]:
+    def verify_password(self, password: str, hash_password: str) -> bool:
+        return pwd_context.verify(password, hash_password)
+    
+    async def login(self, data: UserLogin) -> Dict[str, Any]:
         user = await self.user_repo.get_by_email(data.email)
 
         if not user or not pwd_context.verify(data.password, user.hashed_password):
@@ -50,12 +67,6 @@ class UserService:
             },
             "user": UserOut.model_validate(user)
         }
-
-    async def list_user_service(self, user_id: int) -> UserOut:
-        user = await self.user_repo.get_by_id(user_id)
-        if not user:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Usuário não encontrado.")
-        return user
 
     async def refresh_token(self, refresh_token: str) -> str:
         try:

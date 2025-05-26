@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, func
 from app.core.database import Base, relationship
 
 class ClientModel(Base):
+    nome = "Cliente"
     __tablename__ = "clients"
     
     id = Column(Integer, primary_key=True)

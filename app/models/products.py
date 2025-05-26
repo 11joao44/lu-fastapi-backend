@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, Numeric, Date, DateTime, f
 from app.core.database import Base
 
 class ProductModel(Base):
+    nome = "Produto"
     __tablename__ = "products"
     
     id = Column(Integer, primary_key=True)

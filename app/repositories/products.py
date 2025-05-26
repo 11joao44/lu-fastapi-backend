@@ -4,14 +4,13 @@ from typing import Optional
 from decimal import Decimal
 
 from app.models.products import ProductModel
-from app.schemas.products import ProductDetailsSchema, ProductSchema
-
-
+from app.schemas.products import ProductSchema
+ 
 class ProductRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_by_id(self, id: int) -> ProductDetailsSchema:
+    async def get_by_id(self, id: int) -> ProductModel:
         result = await self.session.execute(
             select(ProductModel).where(ProductModel.id == id)
         )
@@ -23,13 +22,13 @@ class ProductRepository:
         )
         return result.scalar_one_or_none()
     
-    async def register_product_repository(self, product_data: ProductModel) -> ProductDetailsSchema:
-        self.session.add(product_data)
+    async def create(self, data: ProductSchema) -> ProductModel:
+        self.session.add(data)
         await self.session.commit()
-        await self.session.refresh(product_data)
-        return product_data
+        await self.session.refresh(data)
+        return data
     
-    async def list_products_repository(
+    async def list(
         self,
         limit: int,
         offset: int,
@@ -56,15 +55,15 @@ class ProductRepository:
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def update_product_repository(self, client_base: ProductSchema, client_data: ProductSchema) -> ProductDetailsSchema:
-        for key, value in client_data.model_dump(exclude_unset=True).items():
-            setattr(client_base, key, value)
+    async def update(self, base_data: ProductModel, update_data: ProductSchema) -> ProductModel:
+        for key, value in update_data.model_dump(exclude_unset=True).items():
+            setattr(base_data, key, value)
 
         await self.session.commit()
-        await self.session.refresh(client_base)
+        await self.session.refresh(base_data)
 
-        return client_base
+        return base_data
     
-    async def delete_product_repository(self,  product_data: ProductModel) -> None:
-        await self.session.delete(product_data)
+    async def delete(self,  data: ProductModel) -> None:
+        await self.session.delete(data)
         await self.session.commit()
