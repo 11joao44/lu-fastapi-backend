@@ -8,4 +8,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-settings = Settings()
+try:
+    settings = Settings()
+except Exception as e:
+    print("Erro carregando Settings:", e)
+    raise
