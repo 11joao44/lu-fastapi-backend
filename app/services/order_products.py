@@ -8,7 +8,7 @@ from app.repositories.orders import OrderRepository
 from app.repositories.products import ProductRepository
 from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema, OrderProductsUpdateSchema
 from app.repositories.order_products import OrderProductsRepository
-from app.utils.not_found import not_found
+from app.utils.get_by_id_or_404 import get_by_id_or_404
 
 class OrderProductsService:
     def __init__(self,
@@ -19,12 +19,7 @@ class OrderProductsService:
         self.order_repo = order_repo
         self.product_repo = product_repo
         self.order_products_repo = order_products_repo
-
-    async def get_by_id(self, id: int) -> OrderProductsDetailsSchema:
-        data = await self.order_products_repo.get_by_id(id)
-        not_found(data, OrderProductsModel, id)
-        return data
-
+    
     async def list(self,     
         order_id: Optional[int] = None,
         product_id: Optional[int] = None,
@@ -35,37 +30,35 @@ class OrderProductsService:
         date_end: Optional[datetime] = None
     ) -> list[OrderProductsDetailsSchema]:
         data = await self.order_products_repo.list(order_id, product_id, quantity, price_at_moment_min, price_at_moment_max, date_start, date_end)
-        not_found(data, OrderProductsModel)
         return data
-
+    
     async def create(self, data: OrderProductsSchema) -> OrderProductsSchema:
-
+    
         if await self.order_products_repo.get_by_order_and_product(data.order_id, data.product_id):
             raise HTTPException(status.HTTP_409_CONFLICT, f"Já existe um item para order_id={data.order_id} e product_id={data.product_id}.")
-        
-        not_found(await self.order_repo.get_by_id(data.order_id), OrderModel, data.order_id)
-        not_found(await self.product_repo.get_by_id(data.product_id), ProductModel, data.product_id)
-        
+    
+        await get_by_id_or_404(self.order_repo.session, OrderModel, data.order_id)
+        await get_by_id_or_404(self.product_repo.session, ProductModel,  data.product_id)
+    
         order_product = OrderProductsModel(
             order_id = data.order_id,
             product_id = data.product_id,
             quantity = data.quantity,
             price_at_moment = data.price_at_moment
         )
-
+    
         return await self.order_products_repo.create(order_product)
     
-    async def update(self, id: int, data: OrderProductsUpdateSchema) -> OrderProductsSchema:
-        not_found(await self.order_repo.get_by_id(data.order_id), OrderModel, data.order_id)
-        not_found(await self.product_repo.get_by_id(data.product_id), ProductModel, data.product_id)
-        
-        base_data = await self.order_products_repo.get_by_id(id)
-        not_found(base_data, OrderProductsModel, id)
-        return await self.order_products_repo.update(base_data, data)
-        
+    async def get_by_id(self, id: int) -> OrderProductsDetailsSchema:
+        return await get_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
+    
+    async def update(self, id: int, update_data: OrderProductsUpdateSchema) -> OrderProductsSchema:
+        db_instance = await get_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
+        await get_by_id_or_404(self.order_repo.session, OrderModel, db_instance.order_id)
+        await get_by_id_or_404(self.product_repo.session, ProductModel,  db_instance.product_id)
+        return await self.order_products_repo.update(db_instance, update_data)
+    
     async def delete(self, id: int) -> None:
-        data = await self.product_repo.get_by_id(id)
-        not_found(data, OrderProductsModel, id)
+        data = await get_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
         await self.order_products_repo.delete(data)
-        
-        
+    

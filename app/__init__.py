@@ -6,6 +6,7 @@ def create_app() -> FastAPI:
         title="lu-fastapi-backend",
         version='1.0.0'
     )
+    
 
     create_routes(instance_fastapi=app)
 

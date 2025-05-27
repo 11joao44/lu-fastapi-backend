@@ -1,20 +1,14 @@
+from app.schemas.order_products import OrderProductsDetailsSchema
+from app.models.order_products import OrderProductsModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.repositories import BaseRepository
+from sqlalchemy import select
 from datetime import datetime
 from typing import Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.models.order_products import OrderProductsModel
-from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema, OrderProductsUpdateSchema
-
-class OrderProductsRepository:
+class OrderProductsRepository(BaseRepository):
     def __init__(self, session: AsyncSession):
-        self.session = session
-
-    async def get_by_id(self, id: int) -> OrderProductsDetailsSchema:
-        result = await self.session.execute(
-            select(OrderProductsModel).where(OrderProductsModel.id == id)
-        )
-        return result.scalar_one_or_none()
+        super().__init__(session, OrderProductsModel)
     
     async def get_by_order_and_product(self, order_id: int, product_id: int):
         result = await self.session.execute(
@@ -23,7 +17,7 @@ class OrderProductsRepository:
             .where(OrderProductsModel.product_id == product_id)
         )
         return result.scalar_one_or_none()
-
+    
     async def list(self,
         order_id: Optional[int] = None,
         product_id: Optional[int] = None,
@@ -34,7 +28,7 @@ class OrderProductsRepository:
         date_end: Optional[datetime] = None,
     ) -> list[OrderProductsDetailsSchema]:
         query = select(OrderProductsModel)
-
+    
         if order_id:
             query = query.where(OrderProductsModel.order_id == order_id)
         if product_id:
@@ -49,24 +43,6 @@ class OrderProductsRepository:
             query = query.where(OrderProductsModel.created_at >= date_start)
         if date_end is not None:
             query = query.where(OrderProductsModel.created_at <= date_end)
-
+    
         result = await self.session.execute(query)
         return result.scalars().all()
-
-    async def create(self, data: OrderProductsSchema) -> OrderProductsSchema:
-        self.session.add(data)
-        await self.session.commit()
-        await self.session.refresh(data)
-        return data
-    
-    async def update(self, base_data: OrderProductsSchema, update_data: OrderProductsUpdateSchema) -> OrderProductsSchema:
-        for key, value in update_data.model_dump(exclude_unset=True).items():
-            setattr(base_data, key, value)
-
-        await self.session.commit()
-        await self.session.refresh(base_data)
-        return base_data
-
-    async def delete(self, data: OrderProductsSchema) -> None:
-        await self.session.delete(data)
-        await self.session.commit()
