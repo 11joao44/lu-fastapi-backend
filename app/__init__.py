@@ -7,7 +7,6 @@ def create_app() -> FastAPI:
         version='1.0.0'
     )
     
-
     create_routes(instance_fastapi=app)
 
     return app

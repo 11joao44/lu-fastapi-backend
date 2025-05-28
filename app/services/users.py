@@ -7,7 +7,7 @@ from app.schemas.users import UserLogin, UserOut, UserRegister
 from app.core.config import settings
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
-from app.utils.get_by_id_or_404 import get_by_id_or_404
+from app.utils.fecth_by_id_or_404 import fecth_by_id_or_404
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -16,7 +16,7 @@ class UserService:
         self.user_repo = user_repo
         
     async def delete(self, id: int) -> None:
-        data = await get_by_id_or_404(self.user_repo.session, UserModel, id)
+        data = await fecth_by_id_or_404(self.user_repo.session, UserModel, id)
         await self.user_repo.delete(data)
     
     async def list(self, id: int) -> UserModel:
@@ -26,7 +26,7 @@ class UserService:
     async def create(self, data: UserRegister) -> UserModel:
     
         if await self.user_repo.get_by_email(data.email):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado.")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"O E-mail: {data.email} já foi cadastrado.")
     
         if len(data.password) < 8:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Senha deve ter pelo menos 8 caracteres.")
@@ -40,7 +40,7 @@ class UserService:
         return await self.user_repo.create(user)
     
     async def update(self, id: int, update_data: UserRegister) -> UserModel:
-        db_instance = await get_by_id_or_404(self.user_repo.session, UserModel, id)
+        db_instance = await fecth_by_id_or_404(self.user_repo.session, UserModel, id)
         return await self.user_repo.update(db_instance, update_data)
     
     def hash_password(self, password: str) -> str:

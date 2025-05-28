@@ -3,7 +3,7 @@ from decimal import Decimal
 from app.models.products import ProductModel
 from app.repositories.products import ProductRepository
 from app.schemas.products import ProductSchema, ProductUpdateSchema
-from app.utils.get_by_id_or_404 import get_by_id_or_404
+from app.utils.fecth_by_id_or_404 import fecth_by_id_or_404
 from fastapi import HTTPException, status
 
 class ProductService:
@@ -11,7 +11,7 @@ class ProductService:
         self.product_repo = product_repo
     
     async def get_by_id(self, id: int) -> ProductModel:
-        return await get_by_id_or_404(self.product_repo.session, ProductModel, id)
+        return await fecth_by_id_or_404(self.product_repo.session, ProductModel, id)
     
     async def list(self, 
         limit: int,
@@ -42,9 +42,9 @@ class ProductService:
         return await self.product_repo.create(product)
     
     async def update(self, id: int, update_data: ProductUpdateSchema) -> ProductModel:
-        db_instance = await get_by_id_or_404(self.product_repo.session, ProductModel, id)
+        db_instance = await fecth_by_id_or_404(self.product_repo.session, ProductModel, id)
         return await self.product_repo.update(db_instance, update_data)
     
     async def delete(self, id: int) -> None:
-        data = await get_by_id_or_404(self.product_repo.session, ProductModel, id)
+        data = await fecth_by_id_or_404(self.product_repo.session, ProductModel, id)
         await self.product_repo.delete(data)

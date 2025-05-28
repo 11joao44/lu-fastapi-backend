@@ -7,7 +7,7 @@ from app.repositories.clients import ClientRepository
 from app.repositories.orders import OrderRepository
 from app.repositories.users import UserRepository
 from app.schemas.orders import OrderSchema, OrderUpdateSchema
-from app.utils.get_by_id_or_404 import get_by_id_or_404
+from app.utils.fecth_by_id_or_404 import fecth_by_id_or_404
 
 class OrderService:
     def __init__(self, order_repo: OrderRepository, user_repo: UserRepository, client_repo: ClientRepository):
@@ -16,7 +16,7 @@ class OrderService:
         self.user_repo = user_repo
     
     async def get_by_id(self, id: int) -> OrderModel:
-        return await get_by_id_or_404(self.order_repo.session, OrderModel, id)
+        return await fecth_by_id_or_404(self.order_repo.session, OrderModel, id)
     
     async def list(self, 
         date_start: Optional[datetime] = None, 
@@ -28,10 +28,9 @@ class OrderService:
     ) -> list[OrderModel]:
         return await self.order_repo.list(date_start, date_end, product_id, client_id, section, status)
 
-
     async def create(self, data: OrderSchema) -> OrderModel:
-        await get_by_id_or_404(self.client_repo.session, ClientModel, data.client_id)
-        await get_by_id_or_404(self.user_repo.session, UserModel, data.client_id)
+        await fecth_by_id_or_404(self.client_repo.session, ClientModel, data.client_id)
+        await fecth_by_id_or_404(self.user_repo.session, UserModel, data.client_id)
     
         order = OrderModel(
             client_id = data.client_id,
@@ -43,10 +42,10 @@ class OrderService:
         return await self.order_repo.create(order)
     
     async def update(self, id: int, update_data: OrderUpdateSchema) -> OrderModel:
-        db_instance = await get_by_id_or_404(self.order_repo.session, OrderModel, id)
+        db_instance = await fecth_by_id_or_404(self.order_repo.session, OrderModel, id)
         return await self.order_repo.update(db_instance, update_data)
     
     async def delete(self, id: int) -> None:
-        data = await get_by_id_or_404(self.order_repo.session, OrderModel, id)
+        data = await fecth_by_id_or_404(self.order_repo.session, OrderModel, id)
         await self.order_repo.delete(data)
     

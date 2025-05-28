@@ -24,12 +24,11 @@ async def locked_route(token: str = Depends(oauth2_scheme), db: AsyncSession = D
         if user_id is None:
             raise credentials_exception
         
-        user_id = int(user_id)
     except JWTError:
         raise credentials_exception
 
     user_repo = UserRepository(db)
-    user = await user_repo.get_by_id(user_id)
+    user = await user_repo.get_by_field("id", int(user_id))
     
     if user is None:
         raise credentials_exception

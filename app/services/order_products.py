@@ -8,8 +8,9 @@ from app.repositories.orders import OrderRepository
 from app.repositories.products import ProductRepository
 from app.schemas.order_products import OrderProductsDetailsSchema, OrderProductsSchema, OrderProductsUpdateSchema
 from app.repositories.order_products import OrderProductsRepository
-from app.utils.get_by_id_or_404 import get_by_id_or_404
-
+from app.utils.fecth_by_id_or_404 import fecth_by_id_or_404
+from app.utils.check_unique_fields import check_unique_fields
+ 
 class OrderProductsService:
     def __init__(self,
         order_repo: OrderRepository,
@@ -32,13 +33,13 @@ class OrderProductsService:
         data = await self.order_products_repo.list(order_id, product_id, quantity, price_at_moment_min, price_at_moment_max, date_start, date_end)
         return data
     
-    async def create(self, data: OrderProductsSchema) -> OrderProductsSchema:
+    async def create(self, data: OrderProductsSchema) -> OrderProductsModel:
     
         if await self.order_products_repo.get_by_order_and_product(data.order_id, data.product_id):
             raise HTTPException(status.HTTP_409_CONFLICT, f"Já existe um item para order_id={data.order_id} e product_id={data.product_id}.")
     
-        await get_by_id_or_404(self.order_repo.session, OrderModel, data.order_id)
-        await get_by_id_or_404(self.product_repo.session, ProductModel,  data.product_id)
+        await fecth_by_id_or_404(self.order_repo.session, OrderModel, data.order_id)
+        await fecth_by_id_or_404(self.product_repo.session, ProductModel,  data.product_id)
     
         order_product = OrderProductsModel(
             order_id = data.order_id,
@@ -50,15 +51,15 @@ class OrderProductsService:
         return await self.order_products_repo.create(order_product)
     
     async def get_by_id(self, id: int) -> OrderProductsDetailsSchema:
-        return await get_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
+        return await fecth_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
     
     async def update(self, id: int, update_data: OrderProductsUpdateSchema) -> OrderProductsSchema:
-        db_instance = await get_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
-        await get_by_id_or_404(self.order_repo.session, OrderModel, db_instance.order_id)
-        await get_by_id_or_404(self.product_repo.session, ProductModel,  db_instance.product_id)
+        db_instance = await fecth_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
+        await fecth_by_id_or_404(self.order_repo.session, OrderModel, db_instance.order_id)
+        await fecth_by_id_or_404(self.product_repo.session, ProductModel,  db_instance.product_id)
         return await self.order_products_repo.update(db_instance, update_data)
     
     async def delete(self, id: int) -> None:
-        data = await get_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
+        data = await fecth_by_id_or_404(self.order_products_repo.session, OrderProductsModel, id)
         await self.order_products_repo.delete(data)
     
