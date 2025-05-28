@@ -1,44 +1,51 @@
-# tests/conftest.py
-import asyncio
-import pytest
-import pytest_asyncio
-
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from app.core.database import Base, session_db
-from main import app   # <-- seu ASGI app, de onde você exporta `app = create_app()`
-from httpx import AsyncClient
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import sessionmaker
+from typing import Dict
+import pytest_asyncio
+from main import app
+import pytest
 
-# 1) URL do SQLite em memória
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
-# 2) Cria o engine de teste e uma SessionLocal personalizada
-engine = create_async_engine(
-    TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    future=True,
-)
-TestingSessionLocal = sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
+# ===================================================================================
+# FIXTURE: Cria um banco SQLite em memória e injeta uma sessão SQLAlchemy async.
+# ===================================================================================
+@pytest_asyncio.fixture
+async def db_session():
+    """Cria banco de dados SQLite isolado para cada teste."""
+    engine = create_async_engine(DATABASE_URL, echo=True)
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    session = async_session()
+    try:
+        yield session
+    finally:
+        await session.close()
+        await engine.dispose()
 
-
-# 4) Override do dependency session_db para usar nosso TestingSessionLocal
-@pytest.fixture(autouse=True)
-def override_session_db():
-    async def _override_session_db():
-        async with TestingSessionLocal() as session:
-            yield session
-
-    app.dependency_overrides[session_db] = _override_session_db
-    yield
+# ======================================================================================
+# FIXTURE: Injeta a session no app FastAPI para garantir isolamento dos dados no teste.
+# ======================================================================================
+@pytest.fixture
+def client(db_session, monkeypatch):
+    """Retorna um TestClient isolado com a sessão de banco sobrescrita."""
+    def override_session_db():
+        yield db_session
+    app.dependency_overrides[session_db] = override_session_db
+    with TestClient(app) as c:
+        yield c
     app.dependency_overrides.clear()
 
-# 5) Cliente HTTP que já usa o override acima
-@pytest_asyncio.fixture
-async def client():
-    async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        yield ac
+# ======================================================================================
+# FUNÇÃO: Realiza login na API e valida status.
+# ======================================================================================
+def login(client, email: str, password: str, expect_status: int) -> Dict:
+    """Tenta realizar login com email/senha e valida o status."""
+    response = client.post("/auth/login", json={"email": email, "password": password})
+    assert response.status_code == expect_status
+    if expect_status == 200:
+        return response.json()
+    return {}
