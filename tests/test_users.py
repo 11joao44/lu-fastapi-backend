@@ -17,6 +17,7 @@ def register(client, username: str, email: str, password: str, headers: Dict, ex
     return response
 
 
+
 # ====================================================================================== #
 # ------------- TESTE: Valida login bem-sucedido de usuário normal. -------------------- #
 # ====================================================================================== #
@@ -27,6 +28,7 @@ async def test_login(client, db_session):
     
     # ----------- Cenário 3: Login sucesso com usuário login -----------
     login(client, email="login@email.com", password="login_user", expect_status=200)
+
 
 
 # ====================================================================================== #
@@ -41,6 +43,7 @@ async def test_login_email_inexistente(client, db_session):
     login(client, email="naoexiste@email.com", password="normal_user", expect_status=401)
 
 
+
 # ====================================================================================== #
 # ------------- TESTE: Verifica login com senha incorreta para usuário. ---------------- #
 # ====================================================================================== #
@@ -53,6 +56,7 @@ async def test_login_senha_errada(client, db_session):
     login(client, email="normal@email.com", password="errada", expect_status=401)
 
 
+
 # ====================================================================================== #
 # ------- TESTE: Usuário comum tenta registrar novo usuário (sem permissão). ----------- #
 # ====================================================================================== #
@@ -62,6 +66,7 @@ async def test_registrar_usuario_sem_admin(client, db_session):
 
     # ----------- Cenário: Tentar registrar usuário novo como user normal (espera 403) -----------
     register(client, "Usuário Tester", "tester@email.com", "admin@123456", headers, expect_status=403)
+
 
 
 # ====================================================================================== #
@@ -79,8 +84,9 @@ async def test_registrar_usuario_com_admin(client, db_session):
 
     # ----------- Cenário: Registrar usuário duplicado (espera 409) -----------
     register(client, "Usuário Tester", "tester@email.com", "admin@123456", headers, expect_status=409)
-    
-    
+
+
+
 # ====================================================================================== #
 # ----------- TESTE: Admin não pode registrar um usuário com e-mail repetido. ---------- #
 # ====================================================================================== #
