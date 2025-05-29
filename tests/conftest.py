@@ -26,6 +26,7 @@ async def db_session():
         await session.close()
         await engine.dispose()
 
+
 # ======================================================================================
 # FIXTURE: Injeta a session no app FastAPI para garantir isolamento dos dados no teste.
 # ======================================================================================
@@ -39,6 +40,28 @@ def client(db_session, monkeypatch):
         yield c
     app.dependency_overrides.clear()
 
+
+# ======================================================================================
+# BLOCO AUXILIAR: Cria usuários direto no banco para preparar o teste.
+# ======================================================================================
+async def create_user_in_db(db_session, username, email, password, is_admin):
+    """Cria usuário no banco direto (usado para seed do teste)."""
+    from app.models.users import UserModel
+    from app.services.users import UserService
+
+    user = UserModel(
+        username=username,
+        email=email,
+        hashed_password=UserService(None).hash_password(password),
+        is_admin=is_admin,
+        is_active=True
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+
+
 # ======================================================================================
 # FUNÇÃO: Realiza login na API e valida status.
 # ======================================================================================
@@ -49,3 +72,29 @@ def login(client, email: str, password: str, expect_status: int) -> Dict:
     if expect_status == 200:
         return response.json()
     return {}
+
+async def get_token(client, db_session, is_admin=True):
+    # Cria usuário admin, caso ainda não exista
+    await create_user_in_db(db_session, "admin", "admin@email.com", "adminpass", is_admin=is_admin)
+    token = login(client, email="admin@email.com", password="adminpass", expect_status=200)["token"]["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+
+# @pytest_asyncio.fixture
+# async def auth_client():
+#     async with AsyncClient(base_url="http://127.0.0.1:8000") as ac:
+#         # Registra e loga o usuário admin (ajuste se necessário para seu sistema)
+#         await ac.post("/auth/register", json={
+#             "username": "admin",
+#             "email": "admin@email.com",
+#             "password": "admin123",
+#             "is_admin": True
+#         })
+#         resp = await ac.post("/auth/login", json={
+#             "email": "admin@email.com",
+#             "password": "admin123"
+#         })
+#         access_token = resp.json()["token"]["access_token"]
+#         ac.headers = {"Authorization": f"Bearer {access_token}"}
+#         yield ac

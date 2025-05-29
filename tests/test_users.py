@@ -1,5 +1,4 @@
-from asyncio import get_event_loop
-from .conftest import login
+from .conftest import get_token, login, create_user_in_db
 from typing import Dict
 import pytest
 
@@ -14,29 +13,8 @@ def register(client, username: str, email: str, password: str, headers: Dict, ex
         "password": password
     }
     response = client.post("/auth/register", json=body, headers=headers)
-    assert response.status_code == expect_status
+    assert response.status_code == expect_status, response.text
     return response
-
-
-# ======================================================================================
-# BLOCO AUXILIAR: Cria usuários direto no banco para preparar o teste.
-# ======================================================================================
-async def create_user_in_db(db_session, username, email, password, is_admin):
-    """Cria usuário no banco direto (usado para seed do teste)."""
-    from app.models.users import UserModel
-    from app.services.users import UserService
-
-    user = UserModel(
-        username=username,
-        email=email,
-        hashed_password=UserService(None).hash_password(password),
-        is_admin=is_admin,
-        is_active=True
-    )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    return user
 
 
 # ====================================================================================== #
@@ -80,14 +58,10 @@ async def test_login_senha_errada(client, db_session):
 # ====================================================================================== #
 @pytest.mark.asyncio
 async def test_registrar_usuario_sem_admin(client, db_session):
-    # ----------- PREPARAÇÃO: Cria usuário login (não admin) -----------
-    await create_user_in_db(db_session, "normal", "normal@email.com", "normal_user", is_admin=False)
-    
-    # ----------- Cenário 3: Login sucesso com usuário normal -----------
-    tk = login(client, email="normal@email.com", password="normal_user", expect_status=200)["token"]["access_token"]
+    headers = await get_token(client, db_session, False)
 
-    # ----------- Cenário 4: Tentar registrar usuário novo como user normal (espera 403) -----------
-    register(client, "Usuário Tester", "tester@email.com", "admin@123456", {"Authorization": f"Bearer {tk}"}, expect_status=403)
+    # ----------- Cenário: Tentar registrar usuário novo como user normal (espera 403) -----------
+    register(client, "Usuário Tester", "tester@email.com", "admin@123456", headers, expect_status=403)
 
 
 # ====================================================================================== #
@@ -95,20 +69,15 @@ async def test_registrar_usuario_sem_admin(client, db_session):
 # ====================================================================================== #
 @pytest.mark.asyncio
 async def test_registrar_usuario_com_admin(client, db_session):
-    # ----------- PREPARAÇÃO: Cria usuário com admin -----------
-    await create_user_in_db(db_session, "admin", "admin@email.com", "adminpass", is_admin=True)
+    headers = await get_token(client, db_session)
 
-    # ----------- Cenário 5: Login sucesso como admin -----------
-    token = login(client, email="admin@email.com", password="adminpass", expect_status=200)["token"]["access_token"]
-
-    headers = {"Authorization":f"Bearer {token}"}
-    # ----------- Cenário 6: Registrar novo usuário com admin (espera 201) -----------
+    # ----------- Cenário: Registrar novo usuário com admin (espera 201) -----------
     response = register(client, "Usuário Tester", "tester@email.com", "admin@123456", headers, expect_status=201)
     data = response.json()
     assert data["username"] == "Usuário Tester"
     assert data["email"] == "tester@email.com"
 
-    # ----------- Cenário 7: Registrar usuário duplicado (espera 409) -----------
+    # ----------- Cenário: Registrar usuário duplicado (espera 409) -----------
     register(client, "Usuário Tester", "tester@email.com", "admin@123456", headers, expect_status=409)
     
     
@@ -117,11 +86,7 @@ async def test_registrar_usuario_com_admin(client, db_session):
 # ====================================================================================== #
 @pytest.mark.asyncio
 async def test_registrar_usuario_com_admin_duplicado(client, db_session):
-    # ----------- PREPARAÇÃO: Cria usuário com admin -----------
-    await create_user_in_db(db_session, "admin", "admin@email.com", "adminpass", is_admin=True)
-    
-    # ----------- Cenário 5: Login sucesso como admin -----------
-    token = login(client, email="admin@email.com", password="adminpass", expect_status=200)["token"]["access_token"]
-    
-    # ----------- Cenário 7: Registrar usuário duplicado (espera 409) -----------
-    register(client, "admin", "admin@email.com", "admin@123456", {"Authorization":f"Bearer {token}"}, expect_status=409)
+    headers = await get_token(client, db_session)
+
+    # ----------- Cenário: Registrar usuário duplicado (espera 409) -----------
+    register(client, "admin", "admin@email.com", "admin@123456", headers, expect_status=409)
