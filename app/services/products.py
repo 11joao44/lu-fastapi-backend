@@ -24,10 +24,12 @@ class ProductService:
         return await self.product_repo.list(limit, offset, section, price_min, price_max, availability)
     
     async def create(self, data: ProductSchema) -> ProductModel:
-        
         if await self.product_repo.get_by_barcode(data.barcode):
             raise HTTPException(status.HTTP_409_CONFLICT, f"Produto referente ao barcode: {data.barcode} já foi cadastrado.")
-    
+
+        if data.price < 0:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="O preço não pode ser negativo.")
+
         product = ProductModel(
             name=data.name,
             description=data.description,
@@ -38,11 +40,16 @@ class ProductService:
             expiration_date=data.expiration_date,
             image_url=data.image_url
         )
-    
+
         return await self.product_repo.create(product)
     
     async def update(self, id: int, update_data: ProductUpdateSchema) -> ProductModel:
         db_instance = await fecth_by_id_or_404(self.product_repo.session, ProductModel, id)
+        
+        # Só valida preço se for informado
+        if update_data.price is not None and update_data.price < 0:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="O preço não pode ser negativo.")
+
         return await self.product_repo.update(db_instance, update_data)
     
     async def delete(self, id: int) -> None:
